@@ -1,0 +1,88 @@
+/*`Navigation Bar*/
+
+h1{
+    font-size: 70px;
+
+}
+.nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgb(113, 110, 114);
+    padding: 10px 20px;
+}
+
+
+/*Main Content*/
+.main-content {
+    display: flex;
+    justify-content: space-around;
+    background-color: rgba(94, 94, 97, 0.5);
+}
+
+.watch-logo {
+    width: 60px;
+    height: 55px;
+    border-radius: 15px;
+}
+
+.movie-poster {
+    width: 400px;
+    height: auto;
+    padding-bottom: 20px;
+}   
+
+.movie-trailer {
+    width: 690px;
+    height: 400px;
+}
+
+.movie-details{
+    text-align: right;
+    padding-top: 30px;
+    padding-right: 50px;
+
+}
+
+.movie-description {
+    padding-left: 180px;
+}
+.movie-poster-components{
+    padding-top: 70px;
+    padding-left: 60px;
+}
+
+
+/*Comments Section*/
+.comments-section {
+    background-color: lightgrey;
+}
+
+/* rating stars */
+.star-rating {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.star-rating button {
+  background-color: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  font-size: 2rem; /* Makes the stars bigger */
+  padding: 0;
+}
+
+.on {
+  color: #ffc107; /* Gold/Yellow */
+}
+
+.off {
+  color: #ccc; /* Light Gray */
+}
+
+.rating-text {
+  margin-top: 5px;
+  font-size: 0.9rem;
+  color: #555;
+}
