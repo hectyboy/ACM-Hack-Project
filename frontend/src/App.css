@@ -1,0 +1,82 @@
+/* ------------------------------
+   Global tweaks (safe defaults)
+--------------------------------*/
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: #141414;
+  color: #ffffff;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* ------------------------------
+   Netflix-style horizontal row
+--------------------------------*/
+.netflix-row {
+  display: flex;
+  gap: 12px;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  padding-bottom: 6px;
+
+  /* Smooth scrolling + snap */
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+
+  /* Momentum scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
+
+  /* Prevent page scroll chaining when hovering row */
+  overscroll-behavior-x: contain;
+
+  /* Hide scrollbar (Firefox) */
+  scrollbar-width: none;
+}
+
+/* Hide scrollbar (Chrome / Edge / Safari) */
+.netflix-row::-webkit-scrollbar {
+  display: none;
+}
+
+/* ------------------------------
+   Individual poster item
+--------------------------------*/
+.netflix-item {
+  flex: 0 0 auto;
+  width: 150px; /* default poster width */
+  scroll-snap-align: start;
+}
+
+/* ------------------------------
+   Poster hover effect (Netflix-like)
+--------------------------------*/
+.netflix-item button {
+  transition: transform 140ms ease, box-shadow 140ms ease;
+}
+
+.netflix-item:hover button {
+  transform: scale(1.05);
+  z-index: 2;
+}
+
+/* ------------------------------
+   Responsive sizing
+--------------------------------*/
+@media (min-width: 768px) {
+  .netflix-item {
+    width: 170px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .netflix-item {
+    width: 190px;
+  }
+}
+

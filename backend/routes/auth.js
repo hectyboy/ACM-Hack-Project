@@ -26,12 +26,23 @@ module.exports = (db) => {
       const hashedPassword = hashPassword(password, salt);
 
       const user = {
-        uuid: crypto.randomUUID(),
-        username,
-        salt,
-        hashedPassword,
-        ratings: [],
-      };
+      uuid: crypto.randomUUID(),
+      username,
+      salt,
+      hashedPassword,
+
+      // ✅ Profile fields
+      avatarUrl: "", // optional default
+      bio: "",       // optional default
+
+      // ✅ User movie lists (store movieIds as strings from your movies collection)
+      likedMovieIds: [],
+      favoriteMovieIds: [],
+
+      // ✅ Activity feed
+      // examples: { type: "liked"|"favorited"|"reviewed"|"watched", movieId, rating?, date }
+      activities: [],
+    };
 
       await users.insertOne(user);
       return res.status(201).json({ message: "User registered successfully" });

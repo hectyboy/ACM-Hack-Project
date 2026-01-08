@@ -1,38 +1,22 @@
-// src/ProfilePage.tsx
-import React, { useState } from "react";
+// src/ProfilePage/ProfilePage.tsx
+import React, { useEffect, useMemo, useState } from "react";
+import MovieInfo from "../MovieFiles/Movie-info";
 
-import ProfilePageActivity, {
-  type Review,
-  type Discussion,
-} from "./ProfilePageActivity";
-
-import ProfilePageTags, {
-  type TaggedDiscussion,
-} from "./ProfilePageTags";
-
-import ProfilePageNetwork, {
-  type NetworkContact,
-} from "./ProfilePageNetwork";
-
-import ProfilePageReviews, {
-  type FullReview,
-} from "./ProfilePageReviews";
-
-import ProfilePageWatchlist, {
-  type WatchlistMovie,
-} from "./ProfilePageWatchlist";
-
-import ProfilePageLikes, {
-  type LikedPost,
-  type LikedMovie,
-  type LikedDiscussion,
-} from "./ProfilePageLikes";
-
+import ProfilePageActivity, { type Review, type Discussion } from "./ProfilePageActivity";
+import ProfilePageTags, { type TaggedDiscussion } from "./ProfilePageTags";
+import ProfilePageNetwork, { type NetworkContact } from "./ProfilePageNetwork";
+import ProfilePageReviews, { type FullReview } from "./ProfilePageReviews";
+import ProfilePageWatchlist, { type WatchlistMovie } from "./ProfilePageWatchlist";
+import ProfilePageLikes, { type LikedPost, type LikedMovie, type LikedDiscussion } from "./ProfilePageLikes";
 
 /* ───────────────────────────────────────────
-   PROFILE TAB TYPE (Films removed)
+   CONFIG
 ──────────────────────────────────────────── */
+const API_BASE = "http://localhost:3000";
 
+/* ───────────────────────────────────────────
+   PROFILE TAB TYPE
+──────────────────────────────────────────── */
 type ProfileTab =
   | "none"
   | "activity"
@@ -42,226 +26,99 @@ type ProfileTab =
   | "network"
   | "reviews";
 
-
 /* ───────────────────────────────────────────
    PROPS
 ──────────────────────────────────────────── */
-
 interface ProfilePageProps {
+  userId: string;
+  username: string;
+}
+
+/* ───────────────────────────────────────────
+   BACKEND TYPES
+──────────────────────────────────────────── */
+interface DbMovie {
+  id: string;
+  title: string;
+  category: string;
+  year: string;
+  posterUrl: string;
+  trailerUrl: string;
+  description: string;
+  reviewInfo: string;
+}
+
+type UserActivity = {
+  type: "liked" | "favorited" | "reviewed" | "watched";
+  movieId: string;
+  date: string;
+  rating?: string;
+};
+
+interface UserProfile {
+  uuid: string;
   username: string;
   avatarUrl?: string;
   bio?: string;
+  likedMovieIds: string[];
+  favoriteMovieIds: string[];
+  activities: UserActivity[];
 }
-
-interface Film {
-  id: number;
-  title: string;
-  year: number;
-  imageUrl: string;
-}
-
-interface ActivityItem {
-  id: number;
-  action: string;
-  movieTitle: string;
-  rating?: string;
-  date: string;
-}
-
 
 /* ───────────────────────────────────────────
-   DUMMY SECTIONS (Same as before)
+   DUMMY TAB DATA (safe placeholders)
 ──────────────────────────────────────────── */
-
-const favoriteMovies: Film[] = [
-  {
-    id: 1,
-    title: "Spider-Man",
-    year: 2002,
-    imageUrl: "https://m.media-amazon.com/images/I/71Ff5WRGVLL.jpg",
-  },
-  {
-    id: 2,
-    title: "Thunderbolts*",
-    year: 2025,
-    imageUrl:
-      "https://m.media-amazon.com/images/I/61nRTBkcOEL._AC_UF894,1000_QL80_.jpg",
-  },
-  {
-    id: 3,
-    title: "The Avengers",
-    year: 2012,
-    imageUrl: "https://i.ebayimg.com/images/g/1MUAAOSwoLpfJHqq/s-l1200.jpg",
-  },
-  {
-    id: 4,
-    title: "Superman",
-    year: 2025,
-    imageUrl:
-      "https://m.media-amazon.com/images/I/51kO0GWyCIL._AC_UF894,1000_QL80_.jpg",
-  },
-];
-
-const recentActivity: ActivityItem[] = [
-  {
-    id: 1,
-    action: "reviewed",
-    movieTitle: "Spider-Man",
-    rating: "4/5",
-    date: "2023-01-01",
-  },
-  {
-    id: 2,
-    action: "watched",
-    movieTitle: "Thunderbolts*",
-    date: "2025-05-30",
-  },
-  {
-    id: 3,
-    action: "reviewed",
-    movieTitle: "The Avengers",
-    rating: "4/5",
-    date: "2023-03-01",
-  },
-  {
-    id: 4,
-    action: "watched",
-    movieTitle: "Superman",
-    date: "2025-07-16",
-  },
-];
-
 const recentReviews: Review[] = [
-  { id: 1, movieTitle: "Spider-Man", rating: "4/5", date: "2023-01-01" },
-  { id: 2, movieTitle: "Thunderbolts*", rating: "3/5", date: "2025-05-30" },
+  { id: "review-1", movieTitle: "Spider-Man", rating: "4/5", date: "2023-01-01" },
 ];
 
 const recentDiscussions: Discussion[] = [
-  {
-    id: 1,
-    topic: "Best MCU Phase 1 movie?",
-    lastActivity: "2025-06-01",
-  },
-  {
-    id: 2,
-    topic: "Underrated superhero films",
-    lastActivity: "2025-06-15",
-  },
+  { id: "discussion-1", topic: "Best MCU Phase 1 movie?", lastActivity: "2025-06-01" },
 ];
 
 const taggedDiscussions: TaggedDiscussion[] = [
-  {
-    id: 1,
-    topic: "Spider-Man rewatch thread",
-    tagLabel: "@dante",
-    lastActivity: "2025-06-05",
-  },
-  {
-    id: 2,
-    topic: "Top 10 superhero movies of all time",
-    tagLabel: "@dante",
-    lastActivity: "2025-06-10",
-  },
-  {
-    id: 3,
-    topic: "Underrated MCU villains",
-    tagLabel: "#mcu",
-    lastActivity: "2025-06-18",
-  },
+  { id: "tag-1", topic: "Spider-Man rewatch thread", tagLabel: "@joe", lastActivity: "2025-06-05" },
 ];
 
 const networkSuggestions: NetworkContact[] = [
-  {
-    id: 1,
-    name: "Alex Johnson",
-    avatarUrl: "",
-    bioSnippet: "Film student • Loves superheroes",
-    mutualConnections: 3,
-  },
-  {
-    id: 2,
-    name: "Morgan Lee",
-    avatarUrl: "",
-    bioSnippet: "Horror & indie fan",
-    mutualConnections: 1,
-  },
-  {
-    id: 3,
-    name: "Sam Patel",
-    avatarUrl: "",
-    bioSnippet: "MCU completionist",
-    mutualConnections: 5,
-  },
-  {
-    id: 4,
-    name: "Jordan Smith",
-    avatarUrl: "",
-    bioSnippet: "Action & sci-fi",
-    mutualConnections: 2,
-  },
+  { id: "net-1", name: "Alex Johnson", avatarUrl: "", bioSnippet: "Film student", mutualConnections: 3 },
 ];
 
 const allReviews: FullReview[] = [
   {
-    id: 1,
+    id: "full-review-1",
     movieTitle: "Spider-Man",
     rating: "4/5",
     date: "2023-01-01",
-    reviewText:
-      "Still one of my favorite superhero origin stories...",
+    reviewText: "Still one of my favorite superhero origin stories.",
     likes: 12,
     comments: 3,
-  },
-  {
-    id: 2,
-    movieTitle: "The Avengers",
-    rating: "4/5",
-    date: "2023-03-01",
-    reviewText:
-      "The big crossover that actually works...",
-    likes: 8,
-    comments: 2,
   },
 ];
 
 const watchlistMovies: WatchlistMovie[] = [
   {
-    id: 1,
+    id: "watch-1",
     title: "Spider-Man 2",
-    year: 2004,
-    imageUrl: "https://m.media-amazon.com/images/I/51eT6luMLyL._AC_.jpg",
+    year: "2004",
+    posterUrl: "https://m.media-amazon.com/images/I/51eT6luMLyL._AC_.jpg",
   },
 ];
 
 const likedPosts: LikedPost[] = [
-  {
-    id: 1,
-    text: "Just finished my MCU rewatch and Spider-Man still hits hardest.",
-    date: "2025-06-01",
-  },
-];
-
-const likedMovies: LikedMovie[] = [
-  {
-    id: 1,
-    title: "Spider-Man",
-    year: 2002,
-    imageUrl: "https://m.media-amazon.com/images/I/71Ff5WRGVLL.jpg",
-  },
+  { id: "post-1", text: "Just finished my MCU rewatch and Spider-Man still hits hardest.", date: "2025-06-01" },
 ];
 
 const likedDiscussions: LikedDiscussion[] = [
-  {
-    id: 1,
-    topic: "Best superhero trilogies",
-    lastActivity: "2025-06-05",
-  },
+  { id: "discussion-like-1", topic: "Best superhero trilogies", lastActivity: "2025-06-05" },
 ];
 
-
 /* ───────────────────────────────────────────
-   BUTTON COMPONENT
+   UTIL
 ──────────────────────────────────────────── */
+function formatDate(iso: string) {
+  return iso.slice(0, 10);
+}
 
 function BackToProfileButton({ onClick }: { onClick: () => void }) {
   return (
@@ -271,234 +128,240 @@ function BackToProfileButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-
 /* ───────────────────────────────────────────
    MAIN COMPONENT
 ──────────────────────────────────────────── */
-
-const ProfilePage: React.FC<ProfilePageProps> = ({
-  username,
-  avatarUrl,
-  bio,
-}) => {
-
+const ProfilePage: React.FC<ProfilePageProps> = ({ userId, username }) => {
   const [activeTab, setActiveTab] = useState<ProfileTab>("none");
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [movies, setMovies] = useState<DbMovie[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // ✅ NEW: when a favorite poster is clicked, show MovieInfo
+  const [selectedMovie, setSelectedMovie] = useState<DbMovie | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const [pRes, mRes] = await Promise.all([
+          fetch(`${API_BASE}/users/${userId}`),
+          fetch(`${API_BASE}/movies`),
+        ]);
+
+        const pData = await pRes.json().catch(() => ({}));
+        const mData = await mRes.json().catch(() => []);
+
+        if (!pRes.ok) throw new Error(pData?.message || "Failed to load profile");
+        if (!mRes.ok) throw new Error((mData as any)?.message || "Failed to load movies");
+
+        if (cancelled) return;
+
+        // ✅ guard against undefined arrays (prevents .map crash)
+        const safeProfile: UserProfile = {
+          uuid: pData.uuid,
+          username: pData.username,
+          avatarUrl: pData.avatarUrl,
+          bio: pData.bio,
+          likedMovieIds: Array.isArray(pData.likedMovieIds) ? pData.likedMovieIds : [],
+          favoriteMovieIds: Array.isArray(pData.favoriteMovieIds) ? pData.favoriteMovieIds : [],
+          activities: Array.isArray(pData.activities) ? pData.activities : [],
+        };
+
+        setProfile(safeProfile);
+        setMovies(Array.isArray(mData) ? mData : []);
+      } catch (e: any) {
+        if (!cancelled) setError(e?.message || "Failed to load profile");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  const movieById = useMemo(() => {
+    const map = new Map<string, DbMovie>();
+    movies.forEach((m) => map.set(m.id, m));
+    return map;
+  }, [movies]);
+
+  const favoriteMovies = useMemo(() => {
+    if (!profile) return [];
+    return profile.favoriteMovieIds
+      .map((id) => movieById.get(id))
+      .filter(Boolean) as DbMovie[];
+  }, [profile, movieById]);
+
+  const likedMovies: LikedMovie[] = useMemo(() => {
+    if (!profile) return [];
+    return profile.likedMovieIds
+      .map((id) => movieById.get(id))
+      .filter(Boolean)
+      .map((m) => ({
+        id: m!.id,
+        title: m!.title,
+        year: m!.year, // keep string Mongo-safe
+        posterUrl: m!.posterUrl,
+      }));
+  }, [profile, movieById]);
+
+  const recentActivity = useMemo(() => {
+    if (!profile) return [];
+    return [...profile.activities]
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .map((a, i) => ({
+        id: `activity-${i}`,
+        action: a.type,
+        movieTitle: movieById.get(a.movieId)?.title || "Unknown",
+        rating: a.rating,
+        date: formatDate(a.date),
+      }));
+  }, [profile, movieById]);
+
+  // ✅ If a favorite is clicked, show the movie info page
+  if (selectedMovie) {
+    const isFavorited = profile?.favoriteMovieIds.includes(selectedMovie.id) ?? false;
+
+    return (
+      <div className="bg-dark text-light min-vh-100 p-4">
+        <MovieInfo
+          movie={{
+            id: selectedMovie.id,
+            title: selectedMovie.title,
+            posterUrl: selectedMovie.posterUrl,
+            trailerUrl: selectedMovie.trailerUrl,
+            description: selectedMovie.description,
+            reviewInfo: selectedMovie.reviewInfo,
+            category: selectedMovie.category,
+            year: selectedMovie.year,
+          }}
+          onBack={() => setSelectedMovie(null)}
+          userId={userId}
+          isFavorited={isFavorited}
+        />
+      </div>
+    );
+  }
+
+  if (loading) return <div className="text-light p-4">Loading profile…</div>;
+  if (error) return <div className="alert alert-danger m-3">{error}</div>;
+  if (!profile) return <div className="alert alert-danger m-3">Profile not found.</div>;
 
   return (
     <div className="bg-dark text-light min-vh-100">
-
       <nav className="navbar navbar-dark bg-secondary mb-4">
         <div className="container-fluid">
-          <span className="navbar-brand mb-0 h1">Letterboxd Clone</span>
+          <span className="navbar-brand">Letterboxd Clone</span>
         </div>
       </nav>
 
       <div className="container-fluid">
-        <div className="row mb-4">
-
-          {/* LEFT SIDE */}
-          <div className="col-md-3 d-flex flex-column align-items-center">
-
+        <div className="row">
+          {/* LEFT */}
+          <div className="col-md-3 text-center">
             <div
-              className="rounded-circle bg-secondary d-flex justify-content-center align-items-center mb-3"
-              style={{ width: "160px", height: "160px", overflow: "hidden" }}
-            >
-              {avatarUrl ? (
-                <img src={avatarUrl} alt={username} className="img-fluid" />
-              ) : (
-                <span className="fw-semibold">Profile Picture</span>
-              )}
+              className="rounded-circle bg-secondary mx-auto mb-3"
+              style={{ width: 160, height: 160 }}
+            />
+            <h2 className="h5">{profile.username || username}</h2>
+            <div className="bg-secondary p-3 rounded mt-3">
+              {profile.bio || "This user hasn’t added a bio yet."}
             </div>
-
-            <h2 className="h4">{username}</h2>
-
-            <div className="mt-3 w-100">
-              <h3 className="h6 text-uppercase text-muted">Bio</h3>
-              <div className="p-3 bg-secondary rounded">
-                <p className="mb-0">
-                  {bio || "This user hasn’t added a bio yet."}
-                </p>
-              </div>
-            </div>
-
           </div>
 
-
-          {/* RIGHT SIDE */}
+          {/* RIGHT */}
           <div className="col-md-9">
-
             <ul className="nav nav-tabs mb-3">
-
-              <li className="nav-item">
-                <button
-                  className={`nav-link ${activeTab === "activity" ? "active" : ""}`}
-                  onClick={() => setActiveTab("activity")}
-                >
-                  Activity
-                </button>
-              </li>
-
-              <li className="nav-item">
-                <button
-                  className={`nav-link ${activeTab === "watchlist" ? "active" : ""}`}
-                  onClick={() => setActiveTab("watchlist")}
-                >
-                  Watchlist
-                </button>
-              </li>
-
-              <li className="nav-item">
-                <button
-                  className={`nav-link ${activeTab === "likes" ? "active" : ""}`}
-                  onClick={() => setActiveTab("likes")}
-                >
-                  Likes
-                </button>
-              </li>
-
-              <li className="nav-item">
-                <button
-                  className={`nav-link ${activeTab === "tags" ? "active" : ""}`}
-                  onClick={() => setActiveTab("tags")}
-                >
-                  Tags
-                </button>
-              </li>
-
-              <li className="nav-item">
-                <button
-                  className={`nav-link ${activeTab === "network" ? "active" : ""}`}
-                  onClick={() => setActiveTab("network")}
-                >
-                  Network
-                </button>
-              </li>
-
-              <li className="nav-item">
-                <button
-                  className={`nav-link ${activeTab === "reviews" ? "active" : ""}`}
-                  onClick={() => setActiveTab("reviews")}
-                >
-                  Reviews
-                </button>
-              </li>
-
+              {["activity", "watchlist", "likes", "tags", "network", "reviews"].map((tab) => (
+                <li className="nav-item" key={tab}>
+                  <button
+                    className={`nav-link ${activeTab === tab ? "active" : ""}`}
+                    onClick={() => setActiveTab(tab as ProfileTab)}
+                    style={{ textTransform: "capitalize" }}
+                  >
+                    {tab}
+                  </button>
+                </li>
+              ))}
             </ul>
 
-
-            {/* Back Button */}
             {activeTab !== "none" && (
               <BackToProfileButton onClick={() => setActiveTab("none")} />
             )}
 
-
-            {/* HOME VIEW */}
             {activeTab === "none" && (
               <>
-                <div className="mb-4">
-                  <h3 className="h5 mb-3">Favorite Movies</h3>
+                <h3 className="h5 mb-3">Favorite Movies</h3>
+
+                {favoriteMovies.length === 0 ? (
                   <div className="card bg-secondary border-0">
                     <div className="card-body">
-                      <div className="row">
-                        {favoriteMovies.map((movie) => (
-                          <div
-                            key={movie.id}
-                            className="col-6 col-md-3 mb-3"
-                          >
-                            <div className="text-center">
-                              <div className="poster-wrapper mb-2">
-                                <img src={movie.imageUrl} alt={movie.title} />
-                              </div>
-                              <div className="fw-semibold small">
-                                {movie.title}
-                              </div>
-                              <div className="text-muted small">
-                                {movie.year}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
+                      <p className="mb-0 text-muted">No favorites yet.</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="row">
+                    {favoriteMovies.map((m) => (
+                      <div
+                        key={m.id}
+                        className="col-6 col-md-3 mb-3 text-center"
+                        style={{ cursor: "pointer" }}
+                        onClick={() => setSelectedMovie(m)}
+                        title="Open movie"
+                      >
+                        <img
+                          src={m.posterUrl}
+                          alt={m.title}
+                          className="img-fluid rounded mb-2"
+                          style={{ aspectRatio: "2 / 3", objectFit: "cover", width: "100%" }}
+                        />
+                        <div className="small fw-semibold">{m.title}</div>
+                        <div className="text-muted small">{m.year}</div>
                       </div>
-                    </div>
+                    ))}
                   </div>
-                </div>
+                )}
 
-                <div>
-                  <h3 className="h5 mb-3">Recent Activity</h3>
-
+                <h3 className="h5 mt-4 mb-3">Recent Activity</h3>
+                {recentActivity.length === 0 ? (
                   <div className="card bg-secondary border-0">
-                    <div className="card-body p-0">
-
-                      {recentActivity.map((item) => (
-                        <div
-                          key={item.id}
-                          className="d-flex justify-content-between align-items-center border-bottom border-dark px-3 py-2"
-                        >
-                          <div>
-                            <span className="fw-semibold">
-                              {item.action} {item.movieTitle}
-                            </span>
-                            {item.rating && (
-                              <span className="ms-2 text-warning">
-                                {item.rating}
-                              </span>
-                            )}
-                          </div>
-                          <small className="text-muted">{item.date}</small>
-                        </div>
-                      ))}
-
+                    <div className="card-body">
+                      <p className="mb-0 text-muted">No activity yet.</p>
                     </div>
                   </div>
-
-                </div>
+                ) : (
+                  recentActivity.map((a) => (
+                    <div key={a.id} className="border-bottom border-dark py-2">
+                      <strong style={{ textTransform: "capitalize" }}>{a.action}</strong>{" "}
+                      {a.movieTitle}
+                      {a.rating && <span className="text-warning ms-2">{a.rating}</span>}
+                      <span className="text-muted float-end">{a.date}</span>
+                    </div>
+                  ))
+                )}
               </>
             )}
 
-
-            {/* ACTIVITY */}
             {activeTab === "activity" && (
-              <ProfilePageActivity
-                reviews={recentReviews}
-                discussions={recentDiscussions}
-              />
+              <ProfilePageActivity reviews={recentReviews} discussions={recentDiscussions} />
             )}
 
+            {activeTab === "watchlist" && <ProfilePageWatchlist movies={watchlistMovies} />}
 
-            {/* WATCHLIST */}
-            {activeTab === "watchlist" && (
-              <ProfilePageWatchlist movies={watchlistMovies} />
-            )}
-
-
-            {/* LIKES */}
             {activeTab === "likes" && (
-              <ProfilePageLikes
-                posts={likedPosts}
-                movies={likedMovies}
-                discussions={likedDiscussions}
-              />
+              <ProfilePageLikes posts={likedPosts} movies={likedMovies} discussions={likedDiscussions} />
             )}
 
+            {activeTab === "tags" && <ProfilePageTags taggedDiscussions={taggedDiscussions} />}
 
-            {/* TAGS */}
-            {activeTab === "tags" && (
-              <ProfilePageTags taggedDiscussions={taggedDiscussions} />
-            )}
+            {activeTab === "network" && <ProfilePageNetwork contacts={networkSuggestions} />}
 
-
-            {/* NETWORK */}
-            {activeTab === "network" && (
-              <ProfilePageNetwork contacts={networkSuggestions} />
-            )}
-
-
-            {/* REVIEWS */}
-            {activeTab === "reviews" && (
-              <ProfilePageReviews reviews={allReviews} />
-            )}
-
-
+            {activeTab === "reviews" && <ProfilePageReviews reviews={allReviews} />}
           </div>
         </div>
       </div>

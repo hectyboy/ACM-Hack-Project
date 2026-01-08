@@ -2,10 +2,11 @@
 import React from "react";
 
 export interface WatchlistMovie {
-  id: number;
+  id: string;              // ✅ Mongo-safe string id
+  movieId?: string;        // ✅ future backend wiring
   title: string;
-  year: number;
-  imageUrl: string;
+  year: string;            // ✅ matches Mongo movies.year
+  posterUrl: string;       // ✅ matches Mongo movies.posterUrl
 }
 
 interface ProfilePageWatchlistProps {
@@ -36,10 +37,18 @@ const ProfilePageWatchlist: React.FC<ProfilePageWatchlistProps> = ({
               {movies.map((movie) => (
                 <div key={movie.id} className="col-6 col-md-3 mb-3">
                   <div className="text-center">
-                    {/* Reuse same fixed-size poster style as your home profile */}
                     <div className="poster-wrapper mb-2">
-                      <img src={movie.imageUrl} alt={movie.title} />
+                      <img
+                        src={movie.posterUrl}
+                        alt={movie.title}
+                        style={{
+                          aspectRatio: "2 / 3",
+                          objectFit: "cover",
+                          width: "100%",
+                        }}
+                      />
                     </div>
+
                     <div className="fw-semibold small">{movie.title}</div>
                     <div className="text-muted small">{movie.year}</div>
                   </div>

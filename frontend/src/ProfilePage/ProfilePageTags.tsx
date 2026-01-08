@@ -2,10 +2,14 @@
 import React from "react";
 
 export interface TaggedDiscussion {
-  id: number;
-  topic: string;        // Title of the discussion
-  tagLabel: string;     // e.g. "@dante" or "#superheroes"
-  lastActivity: string; // e.g. "2025-06-01"
+  id: string;               // ✅ Mongo-safe string id (can be UUID or Mongo _id as string)
+  topic: string;            // Title of the discussion
+  tagLabel: string;         // e.g. "@dante" or "#superheroes"
+  lastActivity: string;     // ISO date or display string, e.g. "2025-06-01"
+
+  // ✅ optional future wiring fields
+  discussionId?: string;    // if your backend later uses a different id field
+  tagType?: "mention" | "hashtag";
 }
 
 /**
@@ -24,10 +28,8 @@ const ProfilePageTags: React.FC<ProfilePageTagsProps> = ({
 }) => {
   return (
     <div>
-      {/* Header for the Tags "page" */}
       <h3 className="h5 mb-3">Tagged in Discussions</h3>
 
-      {/* Big central card like in your mockup */}
       <div className="card bg-secondary border-0">
         <div className="card-body p-0">
           {taggedDiscussions.length === 0 && (
@@ -41,7 +43,6 @@ const ProfilePageTags: React.FC<ProfilePageTagsProps> = ({
               key={item.id}
               className="d-flex justify-content-between align-items-center border-bottom border-dark px-3 py-3"
             >
-              {/* Left side: topic + tag */}
               <div>
                 <div className="fw-semibold">{item.topic}</div>
 
@@ -49,13 +50,17 @@ const ProfilePageTags: React.FC<ProfilePageTagsProps> = ({
                   <span className="badge bg-light text-dark me-2">
                     {item.tagLabel}
                   </span>
+
                   <span className="text-muted">
-                    You were tagged in this discussion
+                    {item.tagType === "hashtag"
+                      ? "Tagged via hashtag"
+                      : item.tagType === "mention"
+                      ? "Tagged via mention"
+                      : "You were tagged in this discussion"}
                   </span>
                 </div>
               </div>
 
-              {/* Right side: last activity date */}
               <small className="text-muted">{item.lastActivity}</small>
             </div>
           ))}

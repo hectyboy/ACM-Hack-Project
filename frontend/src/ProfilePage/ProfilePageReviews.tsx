@@ -2,10 +2,11 @@
 import React from "react";
 
 export interface FullReview {
-  id: number;
+  id: string; // ✅ was number
   movieTitle: string;
-  rating: string;   // e.g. "4/5"
-  date: string;     // e.g. "2025-01-01"
+  movieId?: string; // ✅ optional: link to DB movie later
+  rating: string; // e.g. "4/5"
+  date: string; // e.g. "2025-01-01" (or ISO string)
   reviewText: string;
   likes?: number;
   comments?: number;
@@ -27,9 +28,7 @@ const ProfilePageReviews: React.FC<ProfilePageReviewsProps> = ({ reviews }) => {
       {reviews.length === 0 && (
         <div className="card bg-secondary border-0">
           <div className="card-body">
-            <p className="mb-0 text-muted">
-              You haven&apos;t written any reviews yet.
-            </p>
+            <p className="mb-0 text-muted">You haven&apos;t written any reviews yet.</p>
           </div>
         </div>
       )}
@@ -49,12 +48,10 @@ const ProfilePageReviews: React.FC<ProfilePageReviewsProps> = ({ reviews }) => {
             {/* Review text */}
             <p className="mb-0">{review.reviewText}</p>
 
-            {/* Optional footer: likes / comments, like a social site */}
+            {/* Optional footer */}
             {(review.likes || review.comments) && (
               <div className="mt-3 small text-muted">
-                {typeof review.likes === "number" && (
-                  <span>{review.likes} likes</span>
-                )}
+                {typeof review.likes === "number" && <span>{review.likes} likes</span>}
                 {typeof review.comments === "number" && (
                   <span className="ms-3">{review.comments} comments</span>
                 )}

@@ -1,26 +1,28 @@
-// src/ProfilePageActivity.tsx
 import React from "react";
 
-/** 
- * A single review the user has written. 
+/**
+ * A single review the user has written.
+ * Mongo-friendly: ids are strings.
  */
 export interface Review {
-  id: number;
-  movieTitle: string; // e.g. "Spider-Man"
-  rating: string;     // e.g. "4/5"
-  date: string;       // e.g. "2025-01-01"
+  id: string;          // ✅ was number
+  movieTitle: string;  // e.g. "Spider-Man"
+  movieId?: string;    // ✅ optional: ties to Mongo movie id later
+  rating: string;      // e.g. "4/5"
+  date: string;        // e.g. "2025-01-01" (or ISO string)
 }
 
-/** 
- * A discussion thread the user has participated in. 
+/**
+ * A discussion thread the user has participated in.
+ * Mongo-friendly: ids are strings.
  */
 export interface Discussion {
-  id: number;
-  topic: string;        // title of the discussion
-  lastActivity: string; // when it was last active
+  id: string;          // ✅ was number
+  topic: string;       // title of the discussion
+  lastActivity: string;// when it was last active (or ISO string)
 }
 
-/** 
+/**
  * Props for the Activity tab component.
  */
 interface ProfilePageActivityProps {
@@ -45,7 +47,6 @@ const ProfilePageActivity: React.FC<ProfilePageActivityProps> = ({
 
         <div className="card bg-secondary border-0">
           <div className="card-body p-0">
-
             {reviews.length === 0 && (
               <p className="p-3 mb-0 text-muted">
                 No reviews yet. Go log your first one!
@@ -65,7 +66,6 @@ const ProfilePageActivity: React.FC<ProfilePageActivityProps> = ({
                 <small className="text-muted">{review.date}</small>
               </div>
             ))}
-
           </div>
         </div>
       </div>
@@ -76,7 +76,6 @@ const ProfilePageActivity: React.FC<ProfilePageActivityProps> = ({
 
         <div className="card bg-secondary border-0">
           <div className="card-body p-0">
-
             {discussions.length === 0 && (
               <p className="p-3 mb-0 text-muted">
                 No discussions yet. Join a conversation!
@@ -95,7 +94,6 @@ const ProfilePageActivity: React.FC<ProfilePageActivityProps> = ({
                 </small>
               </div>
             ))}
-
           </div>
         </div>
       </div>

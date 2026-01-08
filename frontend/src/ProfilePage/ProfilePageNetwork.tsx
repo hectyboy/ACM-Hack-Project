@@ -2,10 +2,10 @@
 import React, { useState } from "react";
 
 export interface NetworkContact {
-  id: number;
+  id: string; // ✅ MongoDB-compatible (was number)
   name: string;
   avatarUrl?: string;
-  bioSnippet?: string;        // short description like "Film student" etc.
+  bioSnippet?: string;        // short description like "Film student"
   mutualConnections?: number; // e.g. 3 mutual friends
 }
 
@@ -16,19 +16,20 @@ interface ProfilePageNetworkProps {
 /**
  * Network tab:
  * - Shows people you might connect with
- * - "Connect" button under each avatar, similar to LinkedIn
+ * - "Connect" button under each avatar
  */
 const ProfilePageNetwork: React.FC<ProfilePageNetworkProps> = ({ contacts }) => {
-  // Track connection status for each contact
-  const [status, setStatus] = useState<Record<number, "none" | "connected">>(() => {
-    const initial: Record<number, "none" | "connected"> = {};
+  // Track connection status for each contact (keyed by Mongo string id)
+  const [status, setStatus] = useState<Record<string, "none" | "connected">>(() => {
+    const initial: Record<string, "none" | "connected"> = {};
     contacts.forEach((c) => {
       initial[c.id] = "none";
     });
     return initial;
   });
 
-  const handleConnect = (id: number) => {
+  const handleConnect = (id: string) => {
+    // Later this can POST to /users/:id/connect
     setStatus((prev) => ({ ...prev, [id]: "connected" }));
   };
 
@@ -51,16 +52,17 @@ const ProfilePageNetwork: React.FC<ProfilePageNetworkProps> = ({ contacts }) => 
               return (
                 <div key={person.id} className="col-6 col-md-4 mb-4">
                   <div className="d-flex flex-column align-items-center">
-                    {/* Avatar circle */}
+                    {/* Avatar */}
                     <div
                       className="rounded-circle bg-dark d-flex justify-content-center align-items-center mb-2"
-                      style={{ width: "140px", height: "140px", overflow: "hidden" }}
+                      style={{ width: 140, height: 140, overflow: "hidden" }}
                     >
                       {person.avatarUrl ? (
                         <img
                           src={person.avatarUrl}
                           alt={person.name}
                           className="img-fluid"
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
                         />
                       ) : (
                         <span className="fw-semibold small">Picture</span>
@@ -70,13 +72,14 @@ const ProfilePageNetwork: React.FC<ProfilePageNetworkProps> = ({ contacts }) => 
                     {/* Name */}
                     <div className="fw-semibold mb-1">{person.name}</div>
 
-                    {/* Optional subtitle line */}
+                    {/* Bio snippet */}
                     {person.bioSnippet && (
                       <div className="small text-muted text-center mb-1">
                         {person.bioSnippet}
                       </div>
                     )}
 
+                    {/* Mutual connections */}
                     {typeof person.mutualConnections === "number" && (
                       <div className="small text-muted mb-2">
                         {person.mutualConnections} mutual connections
