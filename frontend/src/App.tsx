@@ -122,22 +122,7 @@ function App() {
       setLoginError("Network error — is the backend running?");
     }
   }
-  async function refreshAuthUser() {
-  const userId = localStorage.getItem("userId");
-  const username = localStorage.getItem("username");
-  if (!userId || !username) return;
 
-  const res = await fetch(`${API_BASE}/users/${userId}`);
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) return;
-
-  setAuthUser({
-    userId,
-    username,
-    favoriteMovieIds: Array.isArray(data.favoriteMovieIds) ? data.favoriteMovieIds : [],
-    likedMovieIds: Array.isArray(data.likedMovieIds) ? data.likedMovieIds : [],
-  });
-}
 
 
   async function handleSignupSubmit(e: React.FormEvent) {
