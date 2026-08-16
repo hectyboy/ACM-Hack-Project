@@ -29,6 +29,29 @@ export default function MoviePage({ userId, favoriteMovieIds }: MoviePageProps) 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const MOCK_MOVIES: Movie[] = [
+    {
+      id: "1",
+      title: "Inception",
+      category: "Sci-Fi",
+      year: "2010",
+      posterUrl: "https://image.tmdb.org/t/p/w500/l4P14319R2fPCoP333144.jpg",
+      trailerUrl: "",
+      description: "A thief who steals corporate secrets through dream-sharing technology.",
+      reviewInfo: ""
+    },
+    {
+      id: "2",
+      title: "Interstellar",
+      category: "Sci-Fi",
+      year: "2014",
+      posterUrl: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6Mxl4vR31.jpg",
+      trailerUrl: "",
+      description: "A team of explorers travel through a wormhole in space.",
+      reviewInfo: ""
+    }
+  ];
+  
   // Fetch movies once on mount
   useEffect(() => {
     let cancelled = false;
