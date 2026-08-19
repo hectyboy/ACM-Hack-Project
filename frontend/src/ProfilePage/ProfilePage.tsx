@@ -12,7 +12,7 @@ import ProfilePageLikes, { type LikedPost, type LikedMovie, type LikedDiscussion
 /* ───────────────────────────────────────────
    CONFIG
 ──────────────────────────────────────────── */
-const API_BASE = "http://localhost:3000";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 /* ───────────────────────────────────────────
    PROFILE TAB TYPE
@@ -138,7 +138,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ userId, username }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // ✅ NEW: when a favorite poster is clicked, show MovieInfo
+  // ✅ when a favorite poster is clicked, show MovieInfo
   const [selectedMovie, setSelectedMovie] = useState<DbMovie | null>(null);
 
   useEffect(() => {
@@ -205,7 +205,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ userId, username }) => {
       .map((m) => ({
         id: m!.id,
         title: m!.title,
-        year: m!.year, // keep string Mongo-safe
+        year: m!.year,
         posterUrl: m!.posterUrl,
       }));
   }, [profile, movieById]);
