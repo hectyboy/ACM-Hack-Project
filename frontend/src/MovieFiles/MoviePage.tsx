@@ -29,7 +29,7 @@ export default function MoviePage({ userId, favoriteMovieIds }: MoviePageProps) 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const MOCK_MOVIES: Movie[] = [
+  /* const MOCK_MOVIES: Movie[] = [
     {
       id: "1",
       title: "Inception",
@@ -51,6 +51,7 @@ export default function MoviePage({ userId, favoriteMovieIds }: MoviePageProps) 
       reviewInfo: ""
     }
   ];
+  */ 
   
   // Fetch movies once on mount
   useEffect(() => {
