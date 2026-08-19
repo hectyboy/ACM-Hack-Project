@@ -10,7 +10,7 @@ const makeMoviesRouter = require("./routes/movies"); // ✅ NEW
 const app = express();
 
 // ✅ middleware BEFORE routes
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use(cors());
 app.use(express.json());
 
 async function startServer() {
