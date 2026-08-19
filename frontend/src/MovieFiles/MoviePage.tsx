@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import MovieCatalog, { type Movie } from "./MovieCatalog";
 import MovieInfo from "./Movie-info";
 
-const API_BASE = "http://localhost:3000";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 type MoviePageProps = {
   userId?: string;
